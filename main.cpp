@@ -36,7 +36,9 @@ void delay(int);
 
 void initField();
 void updateField();
-void updateField(int, int, int[3][3]);
+void addItem(int, int, int[3][3]);
+void shiftRight();
+void shiftLeft();
 
 int main(){
     initField();
@@ -54,13 +56,21 @@ int main(){
     while (!display.is_closed()){
         display.wait();
 
-        if (display.key()){
+        if (display.is_keySPACE()){
             const int y = display.mouse_y();
             const int x = display.mouse_x();
 
             //image.draw_rectangle(x-pixelsInBlock/2, y-pixelsInBlock/2, x+pixelsInBlock/2, y+pixelsInBlock/2, randomColor, 1);
-            
-            updateField(x/pixelsInBlock, y/pixelsInBlock, item);
+
+            addItem(x/pixelsInBlock, y/pixelsInBlock, item);
+        }
+
+        if (display.is_keyARROWRIGHT()){
+            shiftRight();
+        }
+
+        if (display.is_keyARROWLEFT()){
+            shiftLeft();
         }
 
         image.display(display);
@@ -92,16 +102,37 @@ void initField(){
             field[i][j] = 0;
 }
 
-void updateField(int x0, int y0, int figure[3][3]){
+void addItem(int x0, int y0, int figure[3][3]){
     for (int i = x0; i < (x0+3); i++)
         for (int j = y0; j < (y0+3); j++)
             field[i][j] = figure[j-y0][i-x0];
+}
+
+void shiftRight(){
+    // не будет работать для статичных длоков - доработаь в будущем
+    for (int x = fieldW; x > 0; x--)
+        for (int y = 0; y <= fieldW; y++)
+            field[x][y] = field[x-1][y];
+    
+    for (int y = 0; y < fieldH; y++)
+        field[fieldW][y] = 0;
+}
+
+void shiftLeft(){
+    // не будет работать для статичных длоков - доработаь в будущем
+    for (int x = 0; x < fieldW; x++)
+        for (int y = 0; y < fieldW; y++)
+            field[x][y] = field[x+1][y];
+
+    for (int y = 0; y < fieldH; y++)
+        field[0][y] = 0;
 }
 
 void updateField(){
     for (int y = fieldH; y > 0; y--)
         for (int x = 0; x < fieldW; x++)
             field[x][y] = field[x][y-1];
-    for (int x = 0; x < fieldW; x++)
+
+    for (int x = 0; x <= fieldW; x++)
         field[x][fieldH] = 0;
 }
